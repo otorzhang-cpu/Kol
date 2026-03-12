@@ -451,9 +451,23 @@ function renderTable() {
 
     let statusBadge;
     if (r.fetchPlatform) {
-      if (!d.hasFetched)   statusBadge = `<span class="status-badge badge-gray">待获取</span>`;
-      else if (d.fetchErr) statusBadge = `<span class="status-badge status-err" title="${escHtml(d.fetchErr)}">✗ 失败</span>`;
-      else                 statusBadge = `<span class="status-badge status-ok">✓ 已获取</span>`;
+      if (!d.hasFetched) {
+        statusBadge = `<span class="status-badge badge-gray">待获取</span>`;
+      } else if (d.fetchErr) {
+        statusBadge = `<span class="status-badge status-err" title="${escHtml(d.fetchErr)}">✗ 失败</span>`;
+      } else {
+        // 区分完整获取 / 部分获取 / 无有效数据
+        const f = state.fetchedMap[r.url];
+        const hasViews      = f && (f.views > 0);
+        const hasEngagement = f && (f.likes > 0 || f.comments_count > 0);
+        if (hasViews) {
+          statusBadge = `<span class="status-badge status-ok">✓ 已获取</span>`;
+        } else if (hasEngagement) {
+          statusBadge = `<span class="status-badge status-partial" title="仅获取到互动数据（点赞/评论），播放量平台不对外开放">◑ 仅互动数</span>`;
+        } else {
+          statusBadge = `<span class="status-badge status-nodata" title="未获取到有效数据，可能需要授权或该平台不支持">— 无数据</span>`;
+        }
+      }
     } else {
       statusBadge = `<span class="status-badge badge-gray">${escHtml(r.platform || '—')}</span>`;
     }
