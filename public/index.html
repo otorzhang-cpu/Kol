@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>红人视频统计看板</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="8" fill="#6366f1"/>
+          <rect x="5" y="16" width="4" height="7" rx="1" fill="white"/>
+          <rect x="12" y="11" width="4" height="12" rx="1" fill="white"/>
+          <rect x="19" y="6" width="4" height="17" rx="1" fill="white"/>
+        </svg>
+        <span>红人视频统计看板</span>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-ghost" id="resetBtn" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+          重新上传
+        </button>
+        <button class="btn btn-outline" id="settingsBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          API 配置
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Upload Section -->
+    <section id="uploadSection">
+      <div class="upload-wrap">
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden />
+          <div class="upload-icon-wrap">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <rect width="48" height="48" rx="12" fill="#eef2ff"/>
+              <path d="M24 14v14M17 21l7-7 7 7" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 32h20" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="upload-title">拖拽 KOL 总表到此处，或 <span class="upload-link" id="uploadClick">点击上传</span></p>
+          <p class="upload-sub">支持 .xlsx · .xls · .csv 格式，自动识别负责人、产品、平台、国家等列</p>
+          <div class="upload-platforms">
+            <span class="platform-tag youtube-tag">▶ YouTube</span>
+            <span class="platform-tag ins-tag">📷 Instagram</span>
+            <span class="platform-tag tiktok-tag">🎵 TikTok</span>
+          </div>
+        </div>
+        <div class="upload-hint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          自动识别「负责人、产品、平台、国家、月份」列，并支持多维度筛选与看板展示
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter Bar (appears after upload) -->
+    <section id="filterBar" style="display:none">
+      <div class="filter-bar-card">
+        <div class="filter-top">
+          <div class="file-info-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span id="fileNameBadge" class="file-name-text">—</span>
+            <span id="rowCount" class="row-count-badge">0 条</span>
+            <span id="ytCount" class="yt-count-badge" style="display:none">0 个 YouTube</span>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary btn-sm" id="fetchBtn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+              获取视频数据
+            </button>
+            <button class="btn btn-outline btn-sm" id="exportBtn" style="display:none">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              导出填充表格
+            </button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-group">
+            <label class="filter-label">工作表</label>
+            <select class="filter-select" id="sheetSelect"></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">负责人</label>
+            <select class="filter-select" id="filterResponsible"><option value="">全部</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">产品</label>
+            <select class="filter-select" id="filterProduct"><option value="">全部</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">平台</label>
+            <select class="filter-select" id="filterPlatform"><option value="">全部</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">国家</label>
+            <select class="filter-select" id="filterCountry"><option value="">全部</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">月份</label>
+            <select class="filter-select" id="filterMonth"><option value="">全部</option></select>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="resetFilters">↺ 重置</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Progress Section -->
+    <section id="progressSection" style="display:none">
+      <div class="card">
+        <div class="progress-header">
+          <div>
+            <div class="progress-title">正在获取视频数据</div>
+            <div class="progress-sub" id="progressSub">准备中...</div>
+          </div>
+          <div class="progress-count-badge" id="progressCount">0 / 0</div>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div class="progress-log" id="progressLog"></div>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard" style="display:none">
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div><div class="stat-val" id="totalVideos">0</div><div class="stat-label">视频总数</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-red">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          </div>
+          <div><div class="stat-val" id="ytVideos">0</div><div class="stat-label">YouTube 视频</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div><div class="stat-val" id="totalViews">0</div><div class="stat-label">总播放量</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div><div class="stat-val" id="totalComments">0</div><div class="stat-label">总评论数</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-pink">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div><div class="stat-val" id="totalLikes">0</div><div class="stat-label">总点赞数</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-orange">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div><div class="stat-val" id="engagementRate">0%</div><div class="stat-label">综合互动率</div></div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1: Play ranking + Responsible person -->
+      <div class="charts-row charts-row-7-5">
+        <div class="card chart-card">
+          <div class="card-header">
+            <h3 class="card-title">播放量排行</h3>
+            <select class="select-sm" id="viewsChartTop">
+              <option value="10">Top 10</option>
+              <option value="20">Top 20</option>
+              <option value="999">全部</option>
+            </select>
+          </div>
+          <div class="chart-box" id="viewsChartBox"><canvas id="viewsChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="card-header">
+            <h3 class="card-title">负责人视频量</h3>
+            <select class="select-sm" id="respMetric">
+              <option value="count">视频数</option>
+              <option value="views">播放量</option>
+            </select>
+          </div>
+          <div class="chart-box"><canvas id="respChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2: Product / Platform / Month -->
+      <div class="charts-row charts-row-3">
+        <div class="card chart-card">
+          <div class="card-header"><h3 class="card-title">产品分布</h3></div>
+          <div class="chart-box chart-box-donut"><canvas id="productChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="card-header"><h3 class="card-title">平台分布</h3></div>
+          <div class="chart-box chart-box-donut"><canvas id="platformChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="card-header"><h3 class="card-title">月份上线趋势</h3></div>
+          <div class="chart-box"><canvas id="monthChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Charts Row 3: Country + Keywords + Sentiment -->
+      <div class="charts-row charts-row-7-5">
+        <div class="card chart-card">
+          <div class="card-header">
+            <h3 class="card-title">国家 / 地区分布</h3>
+            <select class="select-sm" id="countryMetric">
+              <option value="count">视频数</option>
+              <option value="views">播放量</option>
+            </select>
+          </div>
+          <div class="chart-box"><canvas id="countryChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="card-header">
+            <h3 class="card-title">评论关键词</h3>
+            <span class="badge badge-gray">需获取 YouTube 数据</span>
+          </div>
+          <div class="chart-box"><canvas id="keywordsChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card table-card">
+        <div class="card-header">
+          <h3 class="card-title">视频详细数据</h3>
+          <div class="card-actions">
+            <input type="text" id="tableSearch" class="search-input" placeholder="搜索频道名 / 负责人 / 产品..." />
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>频道名</th>
+                <th>负责人</th>
+                <th>产品</th>
+                <th>平台</th>
+                <th>国家</th>
+                <th class="th-sort" data-sort="month">月份 ↕</th>
+                <th class="th-sort" data-sort="views">播放量 ↕</th>
+                <th class="th-sort" data-sort="likes">点赞数 ↕</th>
+                <th class="th-sort" data-sort="comments_count">评论数 ↕</th>
+                <th>互动率</th>
+                <th>链接</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>API 配置</h3>
+      <button class="modal-close" id="settingsClose">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">
+          <span class="platform-dot"></span>YouTube Data API v3 Key
+        </label>
+        <input type="text" id="youtubeApiKey" class="form-input" placeholder="AIza..." />
+        <p class="form-hint">
+          用于自动获取 YouTube 播放量、点赞、评论数据。
+          <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">申请 API Key →</a>
+        </p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Meta Access Token（Instagram / Facebook 必填）</label>
+        <input type="text" id="metaToken" class="form-input" placeholder="有 Instagram/Facebook 链接时必填" />
+        <p class="form-hint">
+          <strong>Instagram、Facebook 链接必须填写</strong>才能获取数据；仅 YouTube/TikTok 时可不填。
+          <a href="https://developers.facebook.com/docs/instagram-api/getting-started" target="_blank" rel="noopener">Meta 开发者文档 →</a>
+        </p>
+      </div>
+      <div class="notice">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        YouTube 需 API Key；TikTok 无需配置；<strong>Instagram 与 Facebook 需填写 Meta Access Token</strong>，否则会提示配置后再试。
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="settingsCancel">取消</button>
+      <button class="btn btn-primary" id="settingsSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
