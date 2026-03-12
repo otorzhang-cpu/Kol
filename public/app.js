@@ -238,7 +238,6 @@ function populateFilterOptions() {
 // ============ STATS ============
 function updateStats() {
   const rows = state.filteredRows;
-  const ytRows = rows.filter(r => r.isYoutube);
   let totalViews = 0, totalLikes = 0, totalComments = 0;
   rows.forEach(r => {
     const d = eff(r);
@@ -249,16 +248,10 @@ function updateStats() {
   const engRate = totalViews > 0 ? (totalLikes + totalComments) / totalViews : 0;
 
   document.getElementById('totalVideos').textContent    = rows.length.toLocaleString();
-  document.getElementById('ytVideos').textContent       = ytRows.length.toLocaleString();
   document.getElementById('totalViews').textContent     = fmtNum(totalViews);
   document.getElementById('totalComments').textContent  = fmtNum(totalComments);
   document.getElementById('totalLikes').textContent     = fmtNum(totalLikes);
   document.getElementById('engagementRate').textContent = fmtPct(engRate);
-
-  const fetchableCount = state.allRows.filter(r => r.fetchPlatform).length;
-  const ytEl  = document.getElementById('ytCount');
-  if (fetchableCount > 0) { ytEl.textContent = fetchableCount + ' 条可获取数据'; ytEl.style.display = ''; }
-  else ytEl.style.display = 'none';
 }
 
 // ============ CHART HELPERS ============
@@ -425,46 +418,6 @@ function renderCountryChart() {
   });
 }
 
-// ============ CHART 7: KEYWORDS ============
-function extractKeywords(texts) {
-  const freq = {};
-  for (const text of texts) {
-    const words = text.toLowerCase()
-      .replace(/[^a-z\u4e00-\u9fa5\s]/g, ' ')
-      .split(/\s+/)
-      .filter(w => w.length > 1 && !STOP_WORDS.has(w));
-    words.forEach(w => { freq[w] = (freq[w] || 0) + 1; });
-    for (let i = 0; i < words.length - 1; i++) {
-      if (!STOP_WORDS.has(words[i]) && !STOP_WORDS.has(words[i + 1])) {
-        freq[words[i] + ' ' + words[i + 1]] = (freq[words[i] + ' ' + words[i + 1]] || 0) + 0.5;
-      }
-    }
-  }
-  return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 15)
-    .map(([w, c]) => ({ word: w, count: Math.round(c) }));
-}
-
-function renderKeywordsChart() {
-  destroyChart('keywords');
-  const allComments = [];
-  state.filteredRows.forEach(r => {
-    const f = state.fetchedMap[r.url];
-    if (f && f.recent_comments) allComments.push(...f.recent_comments);
-  });
-  if (allComments.length === 0) return;
-  const kws = extractKeywords(allComments);
-  const ctx = document.getElementById('keywordsChart').getContext('2d');
-  state.charts.keywords = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: kws.map(k => k.word),
-      datasets: [{ data: kws.map(k => k.count),
-        backgroundColor: '#f59e0bcc', borderColor: '#f59e0b',
-        borderWidth: 1, borderRadius: 4 }] },
-    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, ...BASE_OPTS,
-      scales: { x: { grid: SCALE_GRID }, y: { ticks: { font: { size: 11 } } } } },
-  });
-}
-
 // ============ TABLE ============
 function renderTable() {
   const MO = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
@@ -551,7 +504,6 @@ function refreshDashboard() {
   renderPlatformChart();
   renderMonthChart();
   renderCountryChart();
-  renderKeywordsChart();
   renderTable();
 }
 

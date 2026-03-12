@@ -71,7 +71,6 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             <span id="fileNameBadge" class="file-name-text">—</span>
             <span id="rowCount" class="row-count-badge">0 条</span>
-            <span id="ytCount" class="yt-count-badge" style="display:none">0 个 YouTube</span>
           </div>
           <div class="filter-actions">
             <button class="btn btn-primary btn-sm" id="fetchBtn">
@@ -143,12 +142,6 @@
           <div><div class="stat-val" id="totalVideos">0</div><div class="stat-label">视频总数</div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon stat-icon-red">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-          </div>
-          <div><div class="stat-val" id="ytVideos">0</div><div class="stat-label">YouTube 视频</div></div>
-        </div>
-        <div class="stat-card">
           <div class="stat-icon stat-icon-purple">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </div>
@@ -215,8 +208,8 @@
         </div>
       </div>
 
-      <!-- Charts Row 3: Country + Keywords + Sentiment -->
-      <div class="charts-row charts-row-7-5">
+      <!-- Charts Row 3: Country -->
+      <div class="charts-row">
         <div class="card chart-card">
           <div class="card-header">
             <h3 class="card-title">国家 / 地区分布</h3>
@@ -226,13 +219,6 @@
             </select>
           </div>
           <div class="chart-box"><canvas id="countryChart"></canvas></div>
-        </div>
-        <div class="card chart-card">
-          <div class="card-header">
-            <h3 class="card-title">评论关键词</h3>
-            <span class="badge badge-gray">需获取 YouTube 数据</span>
-          </div>
-          <div class="chart-box"><canvas id="keywordsChart"></canvas></div>
         </div>
       </div>
 
